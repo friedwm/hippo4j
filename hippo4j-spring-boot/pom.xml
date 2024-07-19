@@ -16,5 +16,6 @@
         <module>hippo4j-spring-boot-starter-adapter</module>
         <module>hippo4j-spring-boot-starter-monitor</module>
         <module>hippo4j-config-spring-boot-1x-starter</module>
+        <module>hippo4j-spring-boot-1x-starter</module>
     </modules>
 </project>
