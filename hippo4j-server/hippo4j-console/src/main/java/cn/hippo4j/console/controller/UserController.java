@@ -24,12 +24,14 @@ import cn.hippo4j.auth.model.biz.user.UserReqDTO;
 import cn.hippo4j.auth.model.biz.user.UserRespDTO;
 import cn.hippo4j.auth.security.AuthManager;
 import cn.hippo4j.auth.service.UserService;
+import cn.hippo4j.auth.service.UserService2;
 import cn.hippo4j.common.constant.Constants;
 import cn.hippo4j.common.model.TokenInfo;
 import cn.hippo4j.common.web.base.Result;
 import cn.hippo4j.common.web.base.Results;
 import cn.hippo4j.config.service.biz.TenantService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.meitun.backend.domain.SSOAuthResult;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,6 +63,8 @@ public class UserController {
     private final AuthManager authManager;
 
     private final TenantService tenantService;
+
+    private final UserService2 userService2;
 
     @PostMapping("/apply/token")
     public Result<TokenInfo> applyToken(@RequestBody UserInfo userInfo) {
@@ -107,5 +111,11 @@ public class UserController {
     public Result<List<String>> searchUsersLikeUserName(@PathVariable("userName") String userName) {
         List<String> resultUserNames = userService.getUserLikeUsername(userName);
         return Results.success(resultUserNames);
+    }
+
+    @GetMapping("/sso")
+    public Result<SSOAuthResult> sso(String name, String pwd) {
+        SSOAuthResult login = userService2.login(name, pwd);
+        return Results.success(login);
     }
 }
