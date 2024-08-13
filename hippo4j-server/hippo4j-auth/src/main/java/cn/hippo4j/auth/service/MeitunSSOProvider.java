@@ -1,8 +1,10 @@
 package cn.hippo4j.auth.service;
 
 import cn.hippo4j.auth.model.MeitunSSOAuthenticationToken;
+import cn.hippo4j.auth.model.biz.permission.PermissionReqDTO;
 import cn.hippo4j.auth.model.biz.user.UserReqDTO;
 import com.meitun.backend.domain.SSOAuthResult;
+import com.meitun.ucm.client.UcmClientContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -32,8 +35,8 @@ public class MeitunSSOProvider implements AuthenticationProvider {
                 UserReqDTO userReqDTO = new UserReqDTO();
                 userReqDTO.setUserName(principal);
                 userReqDTO.setPassword(credentials);
-                userReqDTO.setRole("ROLE_USER");
-                userReqDTO.setResources(Collections.emptyList());
+                userReqDTO.setRole(getUserRole(principal));
+                userReqDTO.setResources(getUserResources(principal));
                 userService.upsertUser(userReqDTO);
 
                 authentication.setAuthenticated(true);
@@ -48,6 +51,35 @@ public class MeitunSSOProvider implements AuthenticationProvider {
             log.error("SSO login fail", e);
         }
         return null;
+    }
+
+    private String getUserRole(String username) {
+        if (UcmClientContext.getContext().getProperty("admin_users",
+                                                      "wanyi,dingsheng,quxiao").contains(
+                username)) {
+            return "ROLE_ADMIN";
+        }
+        if (UcmClientContext.getContext().getProperty("manager_users", "xiaolinqiang,gongzihao,renmeng,zhoujian").contains(username)) {
+            return "ROLE_MANAGER";
+        }
+        return "ROLE_USER";
+    }
+
+    private List<PermissionReqDTO> getUserResources(String username) {
+        if (UcmClientContext.getContext().getProperty("advertise_users",
+                                                      "quxiao,wanyi,gongzihao,zhoujian,renmeng,xiaolinqiang").contains(
+                username)) {
+            PermissionReqDTO o = new PermissionReqDTO();
+            o.setResource("advertise");
+            o.setAction("rw");
+            return Collections.singletonList(o);
+        } else if (UcmClientContext.getContext().getProperty("meitun_users", "").contains(username)) {
+            PermissionReqDTO o = new PermissionReqDTO();
+            o.setResource("meitun");
+            o.setAction("rw");
+            return Collections.singletonList(o);
+        }
+        return Collections.emptyList();
     }
 
     @Override
