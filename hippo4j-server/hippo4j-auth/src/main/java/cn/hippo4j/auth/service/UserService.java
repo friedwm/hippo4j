@@ -73,4 +73,10 @@ public interface UserService {
      * @return user response
      */
     UserRespDTO getUser(UserReqDTO requestParam);
+
+    /**
+     * 如果用户不存在就插入用户，否则尝试更新用户密码
+     * @param requestParam
+     */
+    void upsertUser(UserReqDTO requestParam);
 }

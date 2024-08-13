@@ -17,6 +17,7 @@
 
 package cn.hippo4j.auth.filter;
 
+import cn.hippo4j.auth.model.MeitunSSOAuthenticationToken;
 import cn.hippo4j.auth.model.biz.user.JwtUser;
 import cn.hippo4j.auth.model.biz.user.LoginUser;
 import cn.hippo4j.auth.toolkit.JwtTokenUtil;
@@ -66,16 +67,27 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                                 HttpServletResponse response) throws AuthenticationException {
         // Get logged in information from the input stream.
         Authentication authenticate = null;
+        LoginUser loginUser = null;
         try {
-            LoginUser loginUser = new ObjectMapper().readValue(request.getInputStream(), LoginUser.class);
+            loginUser = new ObjectMapper().readValue(request.getInputStream(), LoginUser.class);
             request.setAttribute("loginUser", loginUser);
             rememberMe.set(loginUser.getRememberMe());
             authenticate = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword(), new ArrayList()));
+                    new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword(),
+                                                            new ArrayList()));
+            if (authenticate != null) {
+                return authenticate;
+            }
         } catch (BadCredentialsException e) {
             log.warn("Bad credentials exception: {}", e.getMessage());
         } catch (Exception e) {
             log.error("Attempt authentication error", e);
+        }
+
+        if (loginUser != null) {
+            authenticate = authenticationManager.authenticate(new MeitunSSOAuthenticationToken(loginUser.getUsername(),
+                                                                                               loginUser.getPassword(),
+                                                                                               new ArrayList<>()));
         }
         return authenticate;
     }

@@ -32,6 +32,4 @@ public interface GlobalSSOService {
      */
 
     SSOAuthResult login(SSOSource source, String loginName, String pwd);
-    SSOAuthResult verifyTokenSid(SSOSource source, String token);
-    com.meitun.backend.domain.UserDO getUser(SSOSource source, Long uid);
 }

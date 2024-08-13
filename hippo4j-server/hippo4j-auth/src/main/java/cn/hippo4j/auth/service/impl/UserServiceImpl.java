@@ -34,6 +34,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,16 +48,18 @@ import java.util.stream.Collectors;
  * User service impl.
  */
 @Service
-@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private static final int MINI_PASSWORD_LENGTH = 6;
+    private static final int MINI_PASSWORD_LENGTH = 1;
 
-    private final UserMapper userMapper;
+    @Autowired
+    private UserMapper userMapper;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    private final PermissionService permissionService;
+    @Autowired
+    private PermissionService permissionService;
 
     @Override
     public IPage<UserRespDTO> listUser(UserQueryPageReqDTO requestParam) {
@@ -85,7 +89,7 @@ public class UserServiceImpl implements UserService {
     public void updateUser(UserReqDTO requestParam) {
         if (StringUtil.isNotBlank(requestParam.getPassword())) {
             if (requestParam.getPassword().length() < MINI_PASSWORD_LENGTH) {
-                throw new RuntimeException("密码最少为6个字符");
+                throw new RuntimeException("密码最少为1个字符");
             }
             requestParam.setPassword(bCryptPasswordEncoder.encode(requestParam.getPassword()));
         }
@@ -120,6 +124,19 @@ public class UserServiceImpl implements UserService {
         return Optional.ofNullable(userInfo)
                 .map(this::buildUserInfo)
                 .orElseThrow(() -> new ServiceException("查询无此用户, 可以尝试清空缓存或退出登录"));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void upsertUser(UserReqDTO requestParam) {
+        try {
+            UserRespDTO user = getUser(requestParam);
+            // 存在，则更新
+            this.updateUser(requestParam);
+        } catch (Exception e) {
+            // 不存在，则创建
+            this.addUser(requestParam);
+        }
     }
 
     private UserRespDTO buildUserInfo(UserInfo userInfo) {

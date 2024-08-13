@@ -21,7 +21,9 @@ import cn.hippo4j.auth.mapper.UserMapper;
 import cn.hippo4j.auth.model.UserInfo;
 import cn.hippo4j.auth.model.biz.user.JwtUser;
 import cn.hippo4j.auth.model.biz.user.LoginUser;
+import cn.hippo4j.auth.service.MeitunSSOService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -51,13 +53,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Resource
     private UserMapper userMapper;
 
+    @Reference
+    private MeitunSSOService meitunSSOService;
+
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
         JwtUser anonymous = dealWithAnonymous();
         if (!Objects.isNull(anonymous)) {
             return anonymous;
         }
-        UserInfo userInfo = userMapper.selectOne(Wrappers.lambdaQuery(UserInfo.class).eq(UserInfo::getUserName, userName));
+        UserInfo userInfo = userMapper.selectOne(
+                Wrappers.lambdaQuery(UserInfo.class).eq(UserInfo::getUserName, userName));
         if (Objects.isNull(userInfo)) {
             log.warn("User {} not found", userName);
             throw new UsernameNotFoundException(userName);
@@ -66,7 +72,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         jwtUser.setId(userInfo.getId());
         jwtUser.setUsername(userName);
         jwtUser.setPassword(userInfo.getPassword());
-        Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority(userInfo.getRole() + ""));
+        Set<SimpleGrantedAuthority> authorities = Collections.singleton(
+                new SimpleGrantedAuthority(userInfo.getRole() + ""));
         jwtUser.setAuthorities(authorities);
         return jwtUser;
     }

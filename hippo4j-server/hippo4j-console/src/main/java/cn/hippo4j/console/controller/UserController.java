@@ -24,7 +24,7 @@ import cn.hippo4j.auth.model.biz.user.UserReqDTO;
 import cn.hippo4j.auth.model.biz.user.UserRespDTO;
 import cn.hippo4j.auth.security.AuthManager;
 import cn.hippo4j.auth.service.UserService;
-import cn.hippo4j.auth.service.UserService2;
+import cn.hippo4j.auth.service.MeitunSSOService;
 import cn.hippo4j.common.constant.Constants;
 import cn.hippo4j.common.model.TokenInfo;
 import cn.hippo4j.common.web.base.Result;
@@ -64,7 +64,7 @@ public class UserController {
 
     private final TenantService tenantService;
 
-    private final UserService2 userService2;
+    private final MeitunSSOService meitunSSOService;
 
     @PostMapping("/apply/token")
     public Result<TokenInfo> applyToken(@RequestBody UserInfo userInfo) {
@@ -115,7 +115,7 @@ public class UserController {
 
     @GetMapping("/sso")
     public Result<SSOAuthResult> sso(String name, String pwd) {
-        SSOAuthResult login = userService2.login(name, pwd);
+        SSOAuthResult login = meitunSSOService.login(name, pwd);
         return Results.success(login);
     }
 }

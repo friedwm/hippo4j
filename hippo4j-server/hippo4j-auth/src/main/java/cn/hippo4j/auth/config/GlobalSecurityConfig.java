@@ -21,6 +21,7 @@ import cn.hippo4j.auth.constant.Constants;
 import cn.hippo4j.auth.filter.JWTAuthenticationFilter;
 import cn.hippo4j.auth.filter.JWTAuthorizationFilter;
 import cn.hippo4j.auth.security.JwtTokenManager;
+import cn.hippo4j.auth.service.MeitunSSOProvider;
 import cn.hippo4j.auth.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -60,6 +61,9 @@ public class GlobalSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private JwtTokenManager tokenManager;
 
+    @Resource
+    private MeitunSSOProvider meitunSSOProvider;
+
     @Bean
     public UserDetailsService customUserService() {
         return new UserDetailsServiceImpl();
@@ -88,7 +92,7 @@ public class GlobalSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder()).and().authenticationProvider(meitunSSOProvider);
     }
 
     @Override
@@ -100,6 +104,7 @@ public class GlobalSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager()))
                 .addFilter(new JWTAuthorizationFilter(tokenManager, authenticationManager()))
+                .authenticationProvider(meitunSSOProvider)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         disableAuthenticationIfNeeded(http);
         http.authorizeRequests().anyRequest().authenticated();
