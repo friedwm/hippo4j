@@ -144,11 +144,11 @@
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
             </plugin>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.0.2</version>
-<!--                <version>3.4.2</version>-->
+&lt;!&ndash;                <version>3.4.2</version>&ndash;&gt;
                 <configuration>
                     <archive>
                         <manifestEntries>
@@ -162,7 +162,7 @@
                     <outputDirectory/>
                     <testClassesDirectory/>
                 </configuration>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
