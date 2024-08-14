@@ -2,7 +2,7 @@
 
 <configuration debug="false" scan="false">
     <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="hippo4j-server"/>
-    <springProperty scope="context" name="logPath" source="hippo4j.logs.path" defaultValue="${hippo4j.home}/logs"/>
+    <springProperty scope="context" name="logPath" source="hippo4j.logs.path" defaultValue="/data/logs"/>
     <springProperty scope="context" name="logLevel" source="logging.level.root" defaultValue="INFO"/>
 
     <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5level %msg%xEx%n%n"/>
